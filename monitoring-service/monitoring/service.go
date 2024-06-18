@@ -249,6 +249,11 @@ func (s *Service) AccountTransactions(address string, page uint, perPage uint, s
 			return nil, fmt.Errorf("AccountTransactions: %s", err)
 		}
 
+		if len(txs) != int(defaultPerPage) {
+			goAgain = false
+			break
+		}
+
 		for _, tx := range txs {
 			if transactionType == "" || tx.Type == transactionType {
 				if len(transactions) == int(perPage) {

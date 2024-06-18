@@ -308,16 +308,22 @@ func AccountTransactionsEndpoint(svc Service) endpoint.Endpoint {
 
 		txsResponse := make(accountTransactionsResponse, len(txs))
 		for i, tx := range txs {
+			chain, _ := tx.Chain()
 			txsResponse[i] = transactionResponse{
-				Hash:          tx.Hash,
-				Height:        tx.Height,
-				Time:          tx.Time,
-				Type:          tx.Type,
-				ChainID:       tx.ChainID,
+				Hash:    tx.Hash,
+				Height:  tx.Height,
+				Time:    tx.Time,
+				Type:    tx.Type,
+				ChainID: tx.ChainID,
+				Chain: chainResponse{
+					Name: chain.Name,
+					ID:   chain.ID,
+				},
 				SessionHeight: tx.SessionHeight,
 				ExpireHeight:  tx.ExpireHeight,
 				AppPubkey:     tx.AppPubkey,
 				NumRelays:     tx.NumRelays,
+				IsConfirmed:   tx.ResultCode == 0,
 				Reward: rewardResponse{
 					Amount:       tx.Reward.PoktAmount,
 					StakeWeight:  tx.Reward.StakeWeight,

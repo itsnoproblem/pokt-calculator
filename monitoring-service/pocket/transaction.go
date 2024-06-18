@@ -25,8 +25,8 @@ type Transaction struct {
 	Reward        Reward
 }
 
-func (t Transaction) Chain() (Chain, error) {
-	chain, err := ChainFromID(t.ChainID)
+func (tx Transaction) Chain() (Chain, error) {
+	chain, err := ChainFromID(tx.ChainID)
 	if err != nil {
 		return Chain{}, fmt.Errorf("Transaction.Chain: %s", err)
 	}
@@ -35,8 +35,7 @@ func (t Transaction) Chain() (Chain, error) {
 }
 
 // PoktAmount is calculated as:
-//reward = NUM_RELAYS * RelaysToTokensMultiplier * ((FLOOR/ValidatorStakeFloorMultiplier)/( ServicerStakeWeightMultiplier*ValidatorStakeFloorMultiplier))^(ValidatorStakeFloorMultiplierExponent)
-//
+// reward = NUM_RELAYS * RelaysToTokensMultiplier * ((FLOOR/ValidatorStakeFloorMultiplier)/( ServicerStakeWeightMultiplier*ValidatorStakeFloorMultiplier))^(ValidatorStakeFloorMultiplierExponent)
 func (tx Transaction) PoktAmount() float64 {
 	return tx.PoktPerRelay * float64(tx.NumRelays)
 }

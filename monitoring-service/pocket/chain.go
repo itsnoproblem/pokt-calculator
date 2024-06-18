@@ -19,6 +19,60 @@ func ChainFromID(id string) (Chain, error) {
 }
 
 var allChains = map[string]Chain{
+	"0054": {
+		ID:           "0054",
+		Name:         "Osmosis Mainnet",
+		PortalPrefix: "osmosis-mainnet",
+		IsMonetized:  true,
+	},
+	"0060": {
+		ID:           "0060",
+		Name:         "Starknet Mainnet",
+		PortalPrefix: "starknet-mainnet",
+		IsMonetized:  true,
+	},
+	"0061": {
+		ID:           "0061",
+		Name:         "Starknet Testnet",
+		PortalPrefix: "starknet-testnet",
+		IsMonetized:  true,
+	},
+	"0066": {
+		ID:           "0066",
+		Name:         "Arbitrum One",
+		PortalPrefix: "arbitrum-one",
+		IsMonetized:  true,
+	},
+	"0067": {
+		ID:           "0067",
+		Name:         "Velas Mainnet",
+		PortalPrefix: "velas-mainnet",
+		IsMonetized:  true,
+	},
+	"0068": {
+		ID:           "0068",
+		Name:         "Velas Mainnet Archival",
+		PortalPrefix: "velas-mainnet-archival",
+		IsMonetized:  true,
+	},
+	"A087": {
+		ID:           "A087",
+		Name:         "Optimism Sepolia Archival",
+		PortalPrefix: "optimism-sepolia-archival",
+		IsMonetized:  true,
+	},
+	"A086": {
+		ID:           "A086",
+		Name:         "Arbitrum Sepolia Archival",
+		PortalPrefix: "arbitrum-sepolia-archival",
+		IsMonetized:  true,
+	},
+	"A085": {
+		ID:           "A085",
+		Name:         "Polygon Amoy Testnet Archival",
+		PortalPrefix: "amoy-testnet-archival",
+		IsMonetized:  true,
+	},
 	"0029": {
 		ID:           "0029",
 		Name:         "Algorand",
@@ -52,7 +106,7 @@ var allChains = map[string]Chain{
 	"0003": {
 		ID:           "0003",
 		Name:         "Avalanche",
-		PortalPrefix: "avax-mainnet",
+		PortalPrefix: "avax-archival",
 		IsMonetized:  true,
 	},
 	"00A3": {
@@ -81,8 +135,50 @@ var allChains = map[string]Chain{
 	},
 	"0010": {
 		ID:           "0010",
-		Name:         "Binance Smart Chain Archival",
+		Name:         "Binance Smart Chain (Archival)",
 		PortalPrefix: "bsc-archival",
+		IsMonetized:  true,
+	},
+	"A089": {
+		ID:           "A089",
+		Name:         "BNB Archival (OP)",
+		PortalPrefix: "op-bnb-archival",
+		IsMonetized:  true,
+	},
+	"A0CA": {
+		ID:           "A0CA",
+		Name:         "Celestia DA Archival",
+		PortalPrefix: "celestia-da-archival",
+		IsMonetized:  true,
+	},
+	"A0CB": {
+		ID:           "A0CB",
+		Name:         "Celestia Consensus Archival",
+		PortalPrefix: "celestia-consensus-archival",
+		IsMonetized:  true,
+	},
+	"A0CC": {
+		ID:           "A0CC",
+		Name:         "Celestia Testnet DA Archival",
+		PortalPrefix: "celestia-testnet-da-archival",
+		IsMonetized:  true,
+	},
+	"A0CD": {
+		ID:           "A0CD",
+		Name:         "Celestia Testnet Consensus Archival",
+		PortalPrefix: "celestia-testnet-consensus-archival",
+		IsMonetized:  true,
+	},
+	"0065": {
+		ID:           "0065",
+		Name:         "Celo Mainnet",
+		PortalPrefix: "celo-mainnet",
+		IsMonetized:  true,
+	},
+	"A090": {
+		ID:           "A090",
+		Name:         "Blast Archival",
+		PortalPrefix: "blast-archival",
 		IsMonetized:  true,
 	},
 	"0011": {
@@ -103,27 +199,57 @@ var allChains = map[string]Chain{
 		PortalPrefix: "btc-mainnet",
 		IsMonetized:  false,
 	},
+	"0074": {
+		ID:           "0074",
+		Name:         "Polygon zkEVM Mainnet",
+		PortalPrefix: "polygon-zkevm-mainnet",
+		IsMonetized:  false,
+	},
+	"0076": {
+		ID:           "0076",
+		Name:         "Sui Mainnet",
+		PortalPrefix: "sui-mainnet",
+		IsMonetized:  false,
+	},
+	"0079": {
+		ID:           "0079",
+		Name:         "Base Mainnet",
+		PortalPrefix: "base-fullnode-mainnet",
+		IsMonetized:  false,
+	},
+	"0080": {
+		ID:           "0080",
+		Name:         "Base Testnet",
+		PortalPrefix: "base-fullnode-testnet",
+		IsMonetized:  false,
+	},
+	"0084": {
+		ID:           "0084",
+		Name:         "zkSync Era",
+		PortalPrefix: "zksync-era",
+		IsMonetized:  false,
+	},
 	"0048": {
 		ID:           "0048",
-		Name:         "Boba",
+		Name:         "BOBA Mainnet",
 		PortalPrefix: "boba-mainnet",
 		IsMonetized:  true,
 	},
 	"03DF": {
 		ID:           "03DF",
 		Name:         "DFKchain Subnet",
-		PortalPrefix: "dfk-mainnet",
+		PortalPrefix: "avax-dfk",
 		IsMonetized:  true,
 	},
 	"0021": {
 		ID:           "0021",
-		Name:         "ETH",
+		Name:         "Ethereum Mainnet",
 		PortalPrefix: "eth-mainnet",
 		IsMonetized:  true,
 	},
 	"0022": {
 		ID:           "0022",
-		Name:         "Ethereum Archival",
+		Name:         "Ethereum Mainnet Archival",
 		PortalPrefix: "eth-archival",
 		IsMonetized:  true,
 	},
@@ -133,10 +259,22 @@ var allChains = map[string]Chain{
 		PortalPrefix: "eth-archival-trace",
 		IsMonetized:  true,
 	},
+	"0062": {
+		ID:           "0062",
+		Name:         "Ethereum Mainnet High Gas",
+		PortalPrefix: "ethereum-mainnet-high-gas",
+		IsMonetized:  true,
+	},
 	"0026": {
 		ID:           "0026",
 		Name:         "Ethereum Goerli",
 		PortalPrefix: "eth-goerli",
+		IsMonetized:  true,
+	},
+	"0063": {
+		ID:           "0063",
+		Name:         "Ethereum Goerli Archival",
+		PortalPrefix: "goerli-archival",
 		IsMonetized:  true,
 	},
 	"0024": {
@@ -159,14 +297,26 @@ var allChains = map[string]Chain{
 	},
 	"0046": {
 		ID:           "0046",
-		Name:         "Evmos",
+		Name:         "Evmos Mainnet",
 		PortalPrefix: "evmos-mainnet",
+		IsMonetized:  false,
+	},
+	"BE2A": {
+		ID:           "BE2A",
+		Name:         "Experimental",
+		PortalPrefix: "",
 		IsMonetized:  false,
 	},
 	"0049": {
 		ID:           "0049",
 		Name:         "Fantom",
 		PortalPrefix: "fantom-mainnet",
+		IsMonetized:  true,
+	},
+	"A088": {
+		ID:           "A088",
+		Name:         "Frax Archival",
+		PortalPrefix: "frax-archival",
 		IsMonetized:  true,
 	},
 	"0005": {
@@ -197,6 +347,30 @@ var allChains = map[string]Chain{
 		ID:           "0040",
 		Name:         "Harmony Shard 0",
 		PortalPrefix: "harmony-0",
+		IsMonetized:  true,
+	},
+	"B081": {
+		ID:           "B081",
+		Name:         "Holesky Beacon",
+		PortalPrefix: "holesky-beacon",
+		IsMonetized:  true,
+	},
+	"0081": {
+		ID:           "0081",
+		Name:         "Holesky Testnet",
+		PortalPrefix: "holesky-fullnode-testnet",
+		IsMonetized:  true,
+	},
+	"0082": {
+		ID:           "0082",
+		Name:         "Scroll Mainnet",
+		PortalPrefix: "scroll-fullnode-mainnet",
+		IsMonetized:  true,
+	},
+	"0083": {
+		ID:           "0083",
+		Name:         "Radix Mainnet",
+		PortalPrefix: "radix-mainnet",
 		IsMonetized:  true,
 	},
 	"0A40": {
@@ -247,6 +421,48 @@ var allChains = map[string]Chain{
 		PortalPrefix: "iotex-mainnet",
 		IsMonetized:  true,
 	},
+	"0069": {
+		ID:           "0069",
+		Name:         "Oasys Mainnet Archival",
+		PortalPrefix: "oasys-mainnet-archival",
+		IsMonetized:  true,
+	},
+	"0070": {
+		ID:           "0070",
+		Name:         "Oasys Mainnet",
+		PortalPrefix: "oasys-mainnet",
+		IsMonetized:  true,
+	},
+	"0071": {
+		ID:           "0071",
+		Name:         "Kava Mainnet",
+		PortalPrefix: "kava-mainnet",
+		IsMonetized:  true,
+	},
+	"0072": {
+		ID:           "0072",
+		Name:         "Kava Mainnet Archival",
+		PortalPrefix: "kava-mainnet-archival",
+		IsMonetized:  true,
+	},
+	"0075": {
+		ID:           "0075",
+		Name:         "Scroll Testnet",
+		PortalPrefix: "scroll-testnet",
+		IsMonetized:  true,
+	},
+	"0077": {
+		ID:           "0075",
+		Name:         "Sepolia Testnet",
+		PortalPrefix: "sepolia-testnet",
+		IsMonetized:  true,
+	},
+	"0078": {
+		ID:           "0078",
+		Name:         "Sepolia Archival",
+		PortalPrefix: "sepolia-archival",
+		IsMonetized:  true,
+	},
 	"0052": {
 		ID:           "0052",
 		Name:         "NEAR",
@@ -259,10 +475,40 @@ var allChains = map[string]Chain{
 		PortalPrefix: "optimism-mainnet",
 		IsMonetized:  true,
 	},
+	"A053": {
+		ID:           "A053",
+		Name:         "Optimism Archival",
+		PortalPrefix: "optimism-archival",
+		IsMonetized:  true,
+	},
+	"0056": {
+		ID:           "0056",
+		Name:         "Klaytn Mainnet",
+		PortalPrefix: "klaytn-mainnet",
+		IsMonetized:  true,
+	},
+	"0057": {
+		ID:           "0057",
+		Name:         "Meter Mainnet",
+		PortalPrefix: "meter-mainnet",
+		IsMonetized:  true,
+	},
+	"0058": {
+		ID:           "0058",
+		Name:         "Metis Mainnet",
+		PortalPrefix: "metis-mainnet",
+		IsMonetized:  true,
+	},
+	"0059": {
+		ID:           "0059",
+		Name:         "Dogechain Mainnet",
+		PortalPrefix: "dogechain-mainnet",
+		IsMonetized:  true,
+	},
 	"0047": {
 		ID:           "0047",
-		Name:         "OKExChain",
-		PortalPrefix: "oec-mainnet",
+		Name:         "OKC Mainnet",
+		PortalPrefix: "oKc-mainnet",
 		IsMonetized:  true,
 	},
 	"0001": {
@@ -271,9 +517,15 @@ var allChains = map[string]Chain{
 		PortalPrefix: "mainnet",
 		IsMonetized:  true,
 	},
+	"A001": {
+		ID:           "0001",
+		Name:         "Pocket Network Archival",
+		PortalPrefix: "pokt-archival",
+		IsMonetized:  true,
+	},
 	"0009": {
 		ID:           "0009",
-		Name:         "Polygon",
+		Name:         "Polygon Matic",
 		PortalPrefix: "poly-mainnet",
 		IsMonetized:  true,
 	},
@@ -281,6 +533,12 @@ var allChains = map[string]Chain{
 		ID:           "000B",
 		Name:         "Polygon Archival",
 		PortalPrefix: "poly-archival",
+		IsMonetized:  true,
+	},
+	"B021": {
+		ID:           "B021",
+		Name:         "Ethereum Beacon",
+		PortalPrefix: "eth-beacon",
 		IsMonetized:  true,
 	},
 	"000F": {
@@ -301,6 +559,12 @@ var allChains = map[string]Chain{
 		PortalPrefix: "sol-mainnet",
 		IsMonetized:  true,
 	},
+	"C006": {
+		ID:           "C006",
+		Name:         "Solana Custom",
+		PortalPrefix: "sol-mainnet-custom",
+		IsMonetized:  true,
+	},
 	"0031": {
 		ID:           "0031",
 		Name:         "Solana Testnet",
@@ -317,6 +581,18 @@ var allChains = map[string]Chain{
 		ID:           "0050",
 		Name:         "Moonriver",
 		PortalPrefix: "moonriver-mainnet",
+		IsMonetized:  true,
+	},
+	"7A00": {
+		ID:           "7A00",
+		Name:         "Taiko Mainnet",
+		PortalPrefix: "",
+		IsMonetized:  true,
+	},
+	"7A10": {
+		ID:           "7A10",
+		Name:         "Taiko Testnet",
+		PortalPrefix: "",
 		IsMonetized:  true,
 	},
 }

@@ -39,7 +39,7 @@ func HeightEndpoint(svc Service) endpoint.Endpoint {
 }
 
 type monthlyRewardsRequest struct {
-	Address string `json:"address"'`
+	Address string `json:"address"`
 }
 
 type monthlyRewardsResponse struct {
@@ -280,10 +280,11 @@ func TransactionEndpoint(svc Service) endpoint.Endpoint {
 }
 
 type accountTransactionsRequest struct {
-	Address string
-	Page    uint
-	PerPage uint
-	Sort    string
+	Address         string
+	Page            uint
+	PerPage         uint
+	Sort            string
+	TransactionType string
 }
 
 type accountTransactionsResponse []transactionResponse
@@ -300,7 +301,7 @@ func AccountTransactionsEndpoint(svc Service) endpoint.Endpoint {
 			return fail(err)
 		}
 
-		txs, err := svc.AccountTransactions(req.Address, req.Page, req.PerPage, req.Sort)
+		txs, err := svc.AccountTransactions(req.Address, req.Page, req.PerPage, req.Sort, req.TransactionType)
 		if err != nil {
 			return fail(err)
 		}

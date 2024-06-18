@@ -79,19 +79,32 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 	if err != nil {
 		return pocket.Params{}, fmt.Errorf("ParamsAtHeight: provider error: %s", err)
 	}
+	var relaysToTokensMultiplier string
+	var daoAlloc string
+	var proposerCut string
 
 	np := allParams.NodeParams
 	relaysToTokensMultiplier, ok := np.Get("pos/RelaysToTokensMultiplier")
+
 	if !ok {
-		return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/RelaysToTokensMultiplier'", height)
+		relaysToTokensMultiplier, _ = s.provider.Param("pos/RelaysToTokensMultiplier", height)
+
+		if relaysToTokensMultiplier == "" {
+			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/RelaysToTokensMultiplier'", height)
+		}
 	}
+
 	if params.RelaysToTokensMultiplier, err = strconv.ParseFloat(relaysToTokensMultiplier, 64); err != nil {
 		return pocket.Params{}, errors.New("ParamsAtHeight: failed to parse node_params key 'pos/RelaysToTokensMultiplier'")
 	}
 
-	daoAlloc, ok := np.Get("pos/DAOAllocation")
+	daoAlloc, ok = np.Get("pos/DAOAllocation")
 	if !ok {
-		return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pos/DAOAllocation'")
+		daoAlloc, _ = s.provider.Param("pos/DAOAllocation", height)
+
+		if daoAlloc == "" {
+			return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pos/DAOAllocation'")
+		}
 	}
 	da, err := strconv.ParseInt(daoAlloc, 10, 64)
 	if err != nil {
@@ -99,9 +112,12 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 	}
 	params.DaoAllocation = uint8(da)
 
-	proposerCut, ok := np.Get("pos/ProposerPercentage")
+	proposerCut, ok = np.Get("pos/ProposerPercentage")
 	if !ok {
-		return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pos/ProposerPercentage'")
+		proposerCut, _ = s.provider.Param("pos/ProposerPercentage", height)
+		if proposerCut == "" {
+			return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pos/ProposerPercentage'")
+		}
 	}
 	pp, err := strconv.ParseInt(proposerCut, 10, 64)
 	if err != nil {
@@ -111,7 +127,10 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 
 	claimExpirationBlocks, ok := allParams.PocketParams.Get("pocketcore/ClaimExpiration")
 	if !ok {
-		return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pocketcore/ClaimExpiration'")
+		claimExpirationBlocks, _ = s.provider.Param("pocketcore/ClaimExpiration", height)
+		if claimExpirationBlocks == "" {
+			return pocket.Params{}, errors.New("ParamsAtHeight: node_params key not found 'pocketcore/ClaimExpiration'")
+		}
 	}
 	claimExpires, err := strconv.ParseUint(claimExpirationBlocks, 10, 64)
 	if err != nil {
@@ -122,7 +141,10 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 	if height > pocket.RewardScalingActivationHeight {
 		stakeWeightMultiplier, ok := np.Get("pos/ServicerStakeWeightMultiplier")
 		if !ok {
-			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightMultiplier'", height)
+			stakeWeightMultiplier, _ = s.provider.Param("pos/ServicerStakeWeightMultiplier", height)
+			if stakeWeightMultiplier == "" {
+				return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightMultiplier'", height)
+			}
 		}
 		if params.ServicerStakeWeightMultiplier, err = strconv.ParseFloat(stakeWeightMultiplier, 64); err != nil {
 			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightMultiplier", height)
@@ -130,7 +152,10 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 
 		stakeFloorMultiplier, ok := np.Get("pos/ServicerStakeFloorMultiplier")
 		if !ok {
-			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplier'", height)
+			stakeFloorMultiplier, _ = s.provider.Param("pos/ServicerStakeFloorMultiplier", height)
+			if stakeFloorMultiplier == "" {
+				return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplier'", height)
+			}
 		}
 		if params.ServicerStakeFloorMultiplier, err = strconv.ParseFloat(stakeFloorMultiplier, 64); err != nil {
 			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplier", height)
@@ -138,7 +163,10 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 
 		stakeFloorMultiplierExponent, ok := np.Get("pos/ServicerStakeFloorMultiplierExponent")
 		if !ok {
-			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplierExponent'", height)
+			stakeFloorMultiplierExponent, _ = s.provider.Param("pos/ServicerStakeFloorMultiplierExponent", height)
+			if stakeFloorMultiplierExponent == "" {
+				return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplierExponent'", height)
+			}
 		}
 		if params.ServicerStakeFloorMultiplierExponent, err = strconv.ParseFloat(stakeFloorMultiplierExponent, 64); err != nil {
 			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeFloorMultiplierExponent", height)
@@ -146,7 +174,10 @@ func (s *Service) ParamsAtHeight(height int64, forceRefresh bool) (pocket.Params
 
 		stakeWeightCeiling, ok := np.Get("pos/ServicerStakeWeightCeiling")
 		if !ok {
-			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightCeiling'", height)
+			stakeWeightCeiling, _ = s.provider.Param("pos/ServicerStakeWeightCeiling", height)
+			if stakeWeightCeiling == "" {
+				return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightCeiling'", height)
+			}
 		}
 		if params.ServicerStakeWeightCeiling, err = strconv.ParseFloat(stakeWeightCeiling, 64); err != nil {
 			return pocket.Params{}, fmt.Errorf("ParamsAtHeight: node_params key not found at height %d 'pos/ServicerStakeWeightCeiling", height)
@@ -186,7 +217,9 @@ func (s *Service) TxReward(tx pocket.Transaction) (pocket.Reward, error) {
 			// Calculate coins based on weight
 			percentageToKeep := float64(100-params.DaoAllocation-params.ProposerPercentage) / 100
 			coins = (params.RelaysToTokensMultiplier * float64(tx.NumRelays) * weight * percentageToKeep) / 1000000
-			poktPerRelay = coins / float64(tx.NumRelays)
+
+			// Calculate poktPerRelay having in count zero division
+			poktPerRelay = coins / math.Max(1, float64(tx.NumRelays))
 		}
 	} else {
 		weight = 1
@@ -201,57 +234,88 @@ func (s *Service) TxReward(tx pocket.Transaction) (pocket.Reward, error) {
 	}, nil
 }
 
-func (s *Service) AccountTransactions(address string, page uint, perPage uint, sort string) ([]pocket.Transaction, error) {
-	txs, err := s.provider.AccountTransactions(address, page, perPage, sort)
-	if err != nil {
-		return nil, fmt.Errorf("AccountTransactions: %s", err)
-	}
+func (s *Service) AccountTransactions(address string, page uint, perPage uint, sort string, transactionType string) ([]pocket.Transaction, error) {
+	transactions := make([]pocket.Transaction, 0)
 
-	transactions := make([]pocket.Transaction, len(txs))
-	for i, tx := range txs {
-		params, err := s.ParamsAtHeight(int64(tx.Height), false)
-		if err != nil {
-			return nil, fmt.Errorf("AccountTransactions: %s", err)
-		}
+	pageIndex := page
+	goAgain := true
+	defaultPerPage := uint(1000)
 
-		tx.Time, err = s.provider.BlockTime(tx.Height)
-		tx.Reward, err = s.TxReward(tx)
-		if err != nil {
-			return nil, fmt.Errorf("AccountTransactions: %s", err)
-		}
+	for goAgain {
 
-		tx.PoktPerRelay = params.LegacyPoktPerRelay()
+		txs, err := s.provider.AccountTransactions(address, pageIndex, defaultPerPage, sort)
 
 		if err != nil {
 			return nil, fmt.Errorf("AccountTransactions: %s", err)
 		}
 
-		tx.ExpireHeight = params.ClaimExpirationBlocks + tx.Height
-		transactions[i] = tx
+		for _, tx := range txs {
+			if transactionType == "" || tx.Type == transactionType {
+				if len(transactions) == int(perPage) {
+					goAgain = false
+					break
+				}
+
+				params, err := s.ParamsAtHeight(int64(tx.Height), false)
+				if err != nil {
+					return nil, fmt.Errorf("AccountTransactions: %s", err)
+				}
+
+				tx.Time, err = s.provider.BlockTime(tx.Height)
+				tx.Reward, err = s.TxReward(tx)
+				if err != nil {
+					return nil, fmt.Errorf("AccountTransactions: %s", err)
+				}
+
+				tx.PoktPerRelay = params.LegacyPoktPerRelay()
+
+				tx.ExpireHeight = params.ClaimExpirationBlocks + tx.Height
+
+				transactions = append(transactions, tx)
+
+			}
+
+		}
+
+		pageIndex++
 	}
 
 	return transactions, nil
 }
 
 func (s *Service) AccountClaimsAndProofs(address string) (claims, proofs map[string]pocket.Transaction, err error) {
-	page := 1
-	numPerPage := 100
+	pageIndex := 1
+	defaultPerPage := 10000
 	sortDirection := "desc"
-	goAgain := true
+	keepFetching := true
 
 	claims, proofs = make(map[string]pocket.Transaction), make(map[string]pocket.Transaction)
 
-	for goAgain {
-		txs, err := s.AccountTransactions(address, uint(page), uint(numPerPage), sortDirection)
-		if err != nil {
-			return nil, nil, fmt.Errorf("AccountClaimsAndProofs: %s", err)
+	for keepFetching {
+		txs, err := s.provider.AccountTransactions(address, uint(pageIndex), uint(defaultPerPage), sortDirection)
+
+		if len(txs) != defaultPerPage {
+			keepFetching = false
 		}
 
-		if len(txs) < numPerPage {
-			goAgain = false
+		if err != nil {
+			continue
 		}
 
 		for _, tx := range txs {
+
+			params, err := s.ParamsAtHeight(int64(tx.Height), false)
+			tx.Time, err = s.provider.BlockTime(tx.Height)
+			tx.Reward, err = s.TxReward(tx)
+
+			if err != nil {
+				continue
+			}
+
+			tx.PoktPerRelay = params.LegacyPoktPerRelay()
+
+			tx.ExpireHeight = params.ClaimExpirationBlocks + tx.Height
+
 			sessionKey := sessionKey(tx)
 			switch tx.Type {
 			case pocket.TypeClaim:
@@ -261,12 +325,13 @@ func (s *Service) AccountClaimsAndProofs(address string) (claims, proofs map[str
 				proofs[sessionKey] = tx
 				break
 			}
+
 		}
-		page++
+
+		pageIndex++
 	}
 
 	return claims, proofs, nil
-
 }
 
 func (s *Service) Node(address string) (pocket.Node, error) {

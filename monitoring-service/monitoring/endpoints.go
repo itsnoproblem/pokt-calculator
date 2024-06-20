@@ -398,6 +398,7 @@ type nodeResponse struct {
 	IsSynced          bool            `json:"is_synced"`
 	LatestBlockHeight uint            `json:"latest_block_height"`
 	LatestBlockTime   time.Time       `json:"latest_block_time"`
+	CustodialNode     bool            `json:"custodial_node"`
 }
 
 type chainResponse struct {
@@ -441,6 +442,7 @@ func NodeEndpoint(svc Service) endpoint.Endpoint {
 			IsSynced:          node.IsSynced,
 			LatestBlockHeight: node.LatestBlockHeight,
 			LatestBlockTime:   node.LatestBlockTime,
+			CustodialNode:     node.CustodialNode,
 		}, nil
 	}
 }

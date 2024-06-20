@@ -10,6 +10,7 @@ type queryNodeResponse struct {
 	Pubkey        string   `json:"public_key"`
 	Chains        []string `json:"chains"`
 	IsJailed      bool     `json:"jailed"`
+	OutputAddress string   `json:"output_address"`
 	ServiceURL    string   `json:"service_url"`
 	StakedBalance string   `json:"tokens"`
 	CurrentHeight int      `json:"current_height"`

@@ -276,6 +276,7 @@ func (p pocketProvider) Node(address string) (pocket.Node, error) {
 		IsJailed:      nodeResponse.IsJailed,
 		Chains:        chains,
 		IsSynced:      false,
+		CustodialNode: nodeResponse.OutputAddress == address || nodeResponse.OutputAddress == "",
 	}, nil
 }
 

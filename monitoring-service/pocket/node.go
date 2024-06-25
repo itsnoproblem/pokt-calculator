@@ -14,6 +14,7 @@ type Node struct {
 	LatestBlockHeight uint
 	LatestBlockTime   time.Time
 	CustodialNode     bool
+	OutputAddress     string
 }
 
 type Session struct {

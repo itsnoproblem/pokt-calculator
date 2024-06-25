@@ -399,6 +399,7 @@ type nodeResponse struct {
 	LatestBlockHeight uint            `json:"latest_block_height"`
 	LatestBlockTime   time.Time       `json:"latest_block_time"`
 	CustodialNode     bool            `json:"custodial_node"`
+	OutputAddress     string          `json:"output_address"`
 }
 
 type chainResponse struct {
@@ -443,6 +444,7 @@ func NodeEndpoint(svc Service) endpoint.Endpoint {
 			LatestBlockHeight: node.LatestBlockHeight,
 			LatestBlockTime:   node.LatestBlockTime,
 			CustodialNode:     node.CustodialNode,
+			OutputAddress:     node.OutputAddress,
 		}, nil
 	}
 }

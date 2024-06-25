@@ -280,6 +280,7 @@ func (p pocketProvider) Node(address string) (pocket.Node, error) {
 		Chains:        chains,
 		IsSynced:      false,
 		CustodialNode: nodeResponse.OutputAddress == address || nodeResponse.OutputAddress == "",
+		OutputAddress: nodeResponse.OutputAddress,
 	}, nil
 }
 

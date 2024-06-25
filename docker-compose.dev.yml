@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  monitoring-service:
+    container_name: pokt-calculator-api
+    ports:
+    - 7878:7878
+    build:
+      context: ./monitoring-service
+    environment:
+      LISTEN: 0.0.0.0:7878
+      DBPATH: /db
+      # Update the url below to use your node's service url,
+      # or get a free endpoint at https://www.portal.pokt.network/#1
+      POCKET_URL: https://${node_host}:443/v1
+    volumes:
+      - ./.pokt-calculator-db:/db
+  ui:
+    container_name: pokt-calculator-ui
+    build:
+      context: ./ui
+    environment:
+      ENVFILE: .env.dev
+      # Update the url below
+      RPC_URL: http://127.0.0.1:7878
+    ports:
+    - 4444:80
+volumes:
+  disk-db:

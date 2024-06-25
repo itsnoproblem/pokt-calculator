@@ -231,7 +231,10 @@ func (p pocketProvider) NodeAtHeight(address string, height int64) (pocket.Node,
 		IsSynced:      false,
 	}
 
-	p.nodesRepo.Set(address, height, n)
+	err = p.nodesRepo.Set(address, height, n)
+	if err != nil {
+		return pocket.Node{}, err
+	}
 	return n, nil
 }
 

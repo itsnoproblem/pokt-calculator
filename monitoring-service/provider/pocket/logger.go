@@ -107,7 +107,7 @@ func (p loggingProvider) Balance(address string) (uint, error) {
 	return b, nil
 }
 
-func (p loggingProvider) BlockTime(height uint) (time.Time, error) {
+func (p loggingProvider) BlockTime(height int64) (time.Time, error) {
 	//t := timer.Start()
 	bt, err := p.provider.BlockTime(height)
 	if err != nil {

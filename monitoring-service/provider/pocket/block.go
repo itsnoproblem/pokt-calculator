@@ -3,7 +3,7 @@ package pocket
 import "time"
 
 type blockRequest struct {
-	Height uint `json:"height"`
+	Height int64 `json:"height"`
 }
 
 type blockResponse struct {

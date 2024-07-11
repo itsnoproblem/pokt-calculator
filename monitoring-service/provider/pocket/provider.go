@@ -29,8 +29,8 @@ const (
 )
 
 type blockTimesRepo interface {
-	Get(height uint) (t time.Time, exists bool, err error)
-	Set(height uint, t time.Time) error
+	Get(height int64) (t time.Time, exists bool, err error)
+	Set(height int64, t time.Time) error
 }
 
 type paramsRepo interface {
@@ -54,7 +54,7 @@ type Provider interface {
 	Node(address string) (pocket.Node, error)
 	NodeAtHeight(address string, height int64) (pocket.Node, error)
 	Balance(address string) (uint, error)
-	BlockTime(height uint) (time.Time, error)
+	BlockTime(height int64) (time.Time, error)
 	Transaction(hash string) (pocket.Transaction, error)
 	AccountTransactions(address string, page uint, perPage uint, sort string) ([]pocket.Transaction, error)
 	SimulateRelay(servicerUrl, chainID string, payload json.RawMessage) (json.RawMessage, error)
@@ -306,7 +306,7 @@ func (p pocketProvider) Balance(address string) (uint, error) {
 	return balResponse.Balance, nil
 }
 
-func (p pocketProvider) BlockTime(height uint) (time.Time, error) {
+func (p pocketProvider) BlockTime(height int64) (time.Time, error) {
 	var fail = func(err error) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("pocketProvider.BlockTime: %s", err)
 	}

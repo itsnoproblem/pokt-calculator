@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"monitoring-service/pocket"
+	sdk "monitoring-service/types"
 	"sort"
 	"time"
 
@@ -45,8 +46,8 @@ type monthlyRewardsRequest struct {
 type monthlyRewardsResponse struct {
 	Year                   uint                       `json:"year"`
 	Month                  uint                       `json:"month"`
-	NumRelays              uint                       `json:"num_relays"`
-	PoktAmount             float64                    `json:"pokt_amount"`
+	NumRelays              sdk.BigInt                 `json:"num_relays"`
+	PoktAmount             sdk.BigDec                 `json:"pokt_amount"`
 	RelaysByChain          []relaysByChain            `json:"relays_by_chain"`
 	AvgSecBetweenRewards   float64                    `json:"avg_sec_between_rewards"`
 	TotalSecBetweenRewards float64                    `json:"total_sec_between_rewards"`
@@ -55,14 +56,14 @@ type monthlyRewardsResponse struct {
 }
 
 type daysOfWeekResponse struct {
-	Name      string `json:"name"`
-	NumProofs uint   `json:"num_proofs"`
+	Name      string     `json:"name"`
+	NumProofs sdk.BigInt `json:"num_proofs"`
 }
 
 type relaysByChain struct {
-	Chain     string `json:"chain"`
-	Name      string `json:"name"`
-	NumRelays uint   `json:"num_relays"`
+	Chain     string     `json:"chain"`
+	Name      string     `json:"name"`
+	NumRelays sdk.BigInt `json:"num_relays"`
 }
 
 func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
@@ -96,13 +97,13 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 				Transactions:           make([]transactionResponse, len(month.Transactions)),
 			}
 
-			byChain := make(map[string]uint, 0)
+			byChain := make(map[string]sdk.BigInt)
 			for j, tx := range month.Transactions {
 				if _, isSet := byChain[tx.ChainID]; !isSet {
-					byChain[tx.ChainID] = 0
+					byChain[tx.ChainID] = sdk.NewInt(0)
 				}
 
-				byChain[tx.ChainID] += tx.NumRelays
+				byChain[tx.ChainID] = byChain[tx.ChainID].Add(tx.NumRelays)
 				chain, _ := tx.Chain()
 				resp[i].Transactions[j] = transactionResponse{
 					Hash:    tx.Hash,
@@ -165,7 +166,7 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 }
 
 type blockTimesRequest struct {
-	Heights []uint `json:"heights"`
+	Heights []int64 `json:"heights"`
 }
 
 type blockTimesResponse map[uint]time.Time
@@ -226,22 +227,23 @@ type transactionRequest struct {
 }
 
 type rewardResponse struct {
-	Amount       float64 `json:"amount"`
-	StakeWeight  float64 `json:"stake_weight"`
-	PoktPerRelay float64 `json:"pokt_per_relay"`
+	Amount       sdk.BigDec `json:"amount"`
+	NetAmount    sdk.BigDec `json:"net_amount"`
+	StakeWeight  sdk.BigDec `json:"stake_weight"`
+	PoktPerRelay sdk.BigDec `json:"pokt_per_relay"`
 }
 
 type transactionResponse struct {
 	Hash          string         `json:"hash"`
-	Height        uint           `json:"height"`
+	Height        int64          `json:"height"`
 	Time          time.Time      `json:"time"`
 	Type          string         `json:"type"`
 	ChainID       string         `json:"chain_id"`
 	Chain         chainResponse  `json:"chain"`
 	SessionHeight uint           `json:"session_height"`
-	ExpireHeight  uint           `json:"expire_height"`
+	ExpireHeight  int64          `json:"expire_height"`
 	AppPubkey     string         `json:"app_pubkey"`
-	NumRelays     uint           `json:"num_relays"`
+	NumRelays     sdk.BigInt     `json:"num_relays"`
 	IsConfirmed   bool           `json:"is_confirmed"`
 	Reward        rewardResponse `json:"reward"`
 }
@@ -259,6 +261,7 @@ func TransactionEndpoint(svc Service) endpoint.Endpoint {
 		}
 
 		txn, err := svc.Transaction(req.Hash)
+
 		if err != nil {
 			return fail(err)
 		}
@@ -326,6 +329,7 @@ func AccountTransactionsEndpoint(svc Service) endpoint.Endpoint {
 				IsConfirmed:   tx.ResultCode == 0,
 				Reward: rewardResponse{
 					Amount:       tx.Reward.PoktAmount,
+					NetAmount:    tx.Reward.NetPoktAmount,
 					StakeWeight:  tx.Reward.StakeWeight,
 					PoktPerRelay: tx.Reward.PoktPerRelay,
 				},

@@ -2,6 +2,7 @@ package pocket
 
 import (
 	"fmt"
+	sdk "monitoring-service/types"
 	"time"
 )
 
@@ -10,15 +11,15 @@ const TypeProof = "pocketcore/proof"
 
 type Transaction struct {
 	Hash          string
-	Height        uint
+	Height        int64
 	Time          time.Time
 	Address       string
 	Type          string
 	ChainID       string
-	NumRelays     uint
-	PoktPerRelay  float64
+	NumRelays     sdk.BigInt
+	PoktPerRelay  sdk.BigDec
 	SessionHeight uint
-	ExpireHeight  uint
+	ExpireHeight  int64
 	AppPubkey     string
 	ResultCode    int64
 	IsConfirmed   bool
@@ -32,10 +33,4 @@ func (tx Transaction) Chain() (Chain, error) {
 	}
 
 	return chain, nil
-}
-
-// PoktAmount is calculated as:
-// reward = NUM_RELAYS * RelaysToTokensMultiplier * ((FLOOR/ValidatorStakeFloorMultiplier)/( ServicerStakeWeightMultiplier*ValidatorStakeFloorMultiplier))^(ValidatorStakeFloorMultiplierExponent)
-func (tx Transaction) PoktAmount() float64 {
-	return tx.PoktPerRelay * float64(tx.NumRelays)
 }

@@ -1,17 +1,20 @@
 package pocket
 
+import sdk "monitoring-service/types"
+
 const RewardScalingActivationHeight = 69243
 
 type Reward struct {
-	PoktAmount   float64
-	StakeWeight  float64
-	PoktPerRelay float64
+	PoktAmount    sdk.BigDec
+	NetPoktAmount sdk.BigDec
+	StakeWeight   sdk.BigDec
+	PoktPerRelay  sdk.BigDec
 }
 
 type MonthlyReward struct {
 	Year                    uint
 	Month                   uint
-	TotalProofs             uint
+	TotalProofs             sdk.BigInt
 	AvgSecsBetweenRewards   float64
 	TotalSecsBetweenRewards float64
 	DaysOfWeek              map[int]*DayOfWeek
@@ -20,14 +23,14 @@ type MonthlyReward struct {
 
 type DayOfWeek struct {
 	Name   string
-	Proofs uint
+	Proofs sdk.BigInt
 }
 
-func (r *MonthlyReward) PoktAmount() float64 {
-	var total float64
+func (r *MonthlyReward) PoktAmount() sdk.BigDec {
+	var total = sdk.ZeroDec()
 	for _, t := range r.Transactions {
 		if t.IsConfirmed {
-			total += t.PoktAmount()
+			total = total.Add(t.Reward.PoktAmount)
 		}
 	}
 	return total

@@ -121,6 +121,7 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 					NumRelays:     tx.NumRelays,
 					Reward: rewardResponse{
 						Amount:       tx.Reward.PoktAmount,
+						NetAmount:    tx.Reward.NetPoktAmount,
 						StakeWeight:  tx.Reward.StakeWeight,
 						PoktPerRelay: tx.Reward.PoktPerRelay,
 					},
@@ -275,6 +276,7 @@ func TransactionEndpoint(svc Service) endpoint.Endpoint {
 			NumRelays: txn.NumRelays,
 			Reward: rewardResponse{
 				Amount:       txn.Reward.PoktAmount,
+				NetAmount:    txn.Reward.NetPoktAmount,
 				StakeWeight:  txn.Reward.StakeWeight,
 				PoktPerRelay: txn.Reward.PoktPerRelay,
 			},

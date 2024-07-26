@@ -259,7 +259,7 @@ func (s *Service) AccountTransactions(address string, page uint, perPage uint, s
 
 	pageIndex := page
 	goAgain := true
-	defaultPerPage := uint(100)
+	defaultPerPage := uint(1000)
 
 	for goAgain {
 

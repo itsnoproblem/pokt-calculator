@@ -145,6 +145,12 @@ var allChains = map[string]Chain{
 		PortalPrefix: "op-bnb-archival",
 		IsMonetized:  true,
 	},
+	"A091": {
+		ID:           "A091",
+		Name:         "zkLink",
+		PortalPrefix: "zklink-mainnet",
+		IsMonetized:  true,
+	},
 	"A0CA": {
 		ID:           "A0CA",
 		Name:         "Celestia DA Archival",

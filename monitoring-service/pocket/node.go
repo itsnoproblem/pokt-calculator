@@ -13,6 +13,8 @@ type Node struct {
 	IsSynced          bool
 	LatestBlockHeight uint
 	LatestBlockTime   time.Time
+	CustodialNode     bool
+	OutputAddress     string
 }
 
 type Session struct {

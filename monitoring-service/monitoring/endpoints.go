@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"monitoring-service/pocket"
+	sdk "monitoring-service/types"
 	"sort"
 	"time"
 
@@ -39,14 +40,14 @@ func HeightEndpoint(svc Service) endpoint.Endpoint {
 }
 
 type monthlyRewardsRequest struct {
-	Address string `json:"address"'`
+	Address string `json:"address"`
 }
 
 type monthlyRewardsResponse struct {
 	Year                   uint                       `json:"year"`
 	Month                  uint                       `json:"month"`
-	NumRelays              uint                       `json:"num_relays"`
-	PoktAmount             float64                    `json:"pokt_amount"`
+	NumRelays              sdk.BigInt                 `json:"num_relays"`
+	PoktAmount             sdk.BigDec                 `json:"pokt_amount"`
 	RelaysByChain          []relaysByChain            `json:"relays_by_chain"`
 	AvgSecBetweenRewards   float64                    `json:"avg_sec_between_rewards"`
 	TotalSecBetweenRewards float64                    `json:"total_sec_between_rewards"`
@@ -55,14 +56,14 @@ type monthlyRewardsResponse struct {
 }
 
 type daysOfWeekResponse struct {
-	Name      string `json:"name"`
-	NumProofs uint   `json:"num_proofs"`
+	Name      string     `json:"name"`
+	NumProofs sdk.BigInt `json:"num_proofs"`
 }
 
 type relaysByChain struct {
-	Chain     string `json:"chain"`
-	Name      string `json:"name"`
-	NumRelays uint   `json:"num_relays"`
+	Chain     string     `json:"chain"`
+	Name      string     `json:"name"`
+	NumRelays sdk.BigInt `json:"num_relays"`
 }
 
 func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
@@ -96,13 +97,13 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 				Transactions:           make([]transactionResponse, len(month.Transactions)),
 			}
 
-			byChain := make(map[string]uint, 0)
+			byChain := make(map[string]sdk.BigInt)
 			for j, tx := range month.Transactions {
 				if _, isSet := byChain[tx.ChainID]; !isSet {
-					byChain[tx.ChainID] = 0
+					byChain[tx.ChainID] = sdk.NewInt(0)
 				}
 
-				byChain[tx.ChainID] += tx.NumRelays
+				byChain[tx.ChainID] = byChain[tx.ChainID].Add(tx.NumRelays)
 				chain, _ := tx.Chain()
 				resp[i].Transactions[j] = transactionResponse{
 					Hash:    tx.Hash,
@@ -118,8 +119,13 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 					ExpireHeight:  tx.ExpireHeight,
 					AppPubkey:     tx.AppPubkey,
 					NumRelays:     tx.NumRelays,
-					PoktPerRelay:  tx.PoktPerRelay,
-					IsConfirmed:   tx.IsConfirmed,
+					Reward: rewardResponse{
+						Amount:       tx.Reward.PoktAmount,
+						NetAmount:    tx.Reward.NetPoktAmount,
+						StakeWeight:  tx.Reward.StakeWeight,
+						PoktPerRelay: tx.Reward.PoktPerRelay,
+					},
+					IsConfirmed: tx.IsConfirmed,
 				}
 			}
 
@@ -161,7 +167,7 @@ func MonthlyRewardsEndpoint(svc Service) endpoint.Endpoint {
 }
 
 type blockTimesRequest struct {
-	Heights []uint `json:"heights"`
+	Heights []int64 `json:"heights"`
 }
 
 type blockTimesResponse map[uint]time.Time
@@ -221,19 +227,26 @@ type transactionRequest struct {
 	Hash string
 }
 
+type rewardResponse struct {
+	Amount       sdk.BigDec `json:"amount"`
+	NetAmount    sdk.BigDec `json:"net_amount"`
+	StakeWeight  sdk.BigDec `json:"stake_weight"`
+	PoktPerRelay sdk.BigDec `json:"pokt_per_relay"`
+}
+
 type transactionResponse struct {
-	Hash          string        `json:"hash"`
-	Height        uint          `json:"height"`
-	Time          time.Time     `json:"time"`
-	Type          string        `json:"type"`
-	ChainID       string        `json:"chain_id"`
-	Chain         chainResponse `json:"chain"`
-	SessionHeight uint          `json:"session_height"`
-	ExpireHeight  uint          `json:"expire_height"`
-	AppPubkey     string        `json:"app_pubkey"`
-	NumRelays     uint          `json:"num_relays"`
-	PoktPerRelay  float64       `json:"pokt_per_relay"`
-	IsConfirmed   bool          `json:"is_confirmed"`
+	Hash          string         `json:"hash"`
+	Height        int64          `json:"height"`
+	Time          time.Time      `json:"time"`
+	Type          string         `json:"type"`
+	ChainID       string         `json:"chain_id"`
+	Chain         chainResponse  `json:"chain"`
+	SessionHeight uint           `json:"session_height"`
+	ExpireHeight  int64          `json:"expire_height"`
+	AppPubkey     string         `json:"app_pubkey"`
+	NumRelays     sdk.BigInt     `json:"num_relays"`
+	IsConfirmed   bool           `json:"is_confirmed"`
+	Reward        rewardResponse `json:"reward"`
 }
 
 func TransactionEndpoint(svc Service) endpoint.Endpoint {
@@ -249,27 +262,34 @@ func TransactionEndpoint(svc Service) endpoint.Endpoint {
 		}
 
 		txn, err := svc.Transaction(req.Hash)
+
 		if err != nil {
 			return fail(err)
 		}
 
 		return transactionResponse{
-			Hash:         txn.Hash,
-			Height:       txn.Height,
-			Time:         txn.Time,
-			Type:         txn.Type,
-			ChainID:      txn.ChainID,
-			NumRelays:    txn.NumRelays,
-			PoktPerRelay: txn.PoktPerRelay,
+			Hash:      txn.Hash,
+			Height:    txn.Height,
+			Time:      txn.Time,
+			Type:      txn.Type,
+			ChainID:   txn.ChainID,
+			NumRelays: txn.NumRelays,
+			Reward: rewardResponse{
+				Amount:       txn.Reward.PoktAmount,
+				NetAmount:    txn.Reward.NetPoktAmount,
+				StakeWeight:  txn.Reward.StakeWeight,
+				PoktPerRelay: txn.Reward.PoktPerRelay,
+			},
 		}, nil
 	}
 }
 
 type accountTransactionsRequest struct {
-	Address string
-	Page    uint
-	PerPage uint
-	Sort    string
+	Address         string
+	Page            uint
+	PerPage         uint
+	Sort            string
+	TransactionType string
 }
 
 type accountTransactionsResponse []transactionResponse
@@ -286,24 +306,35 @@ func AccountTransactionsEndpoint(svc Service) endpoint.Endpoint {
 			return fail(err)
 		}
 
-		txs, err := svc.AccountTransactions(req.Address, req.Page, req.PerPage, req.Sort)
+		txs, err := svc.AccountTransactions(req.Address, req.Page, req.PerPage, req.Sort, req.TransactionType)
 		if err != nil {
 			return fail(err)
 		}
 
 		txsResponse := make(accountTransactionsResponse, len(txs))
 		for i, tx := range txs {
+			chain, _ := tx.Chain()
 			txsResponse[i] = transactionResponse{
-				Hash:          tx.Hash,
-				Height:        tx.Height,
-				Time:          tx.Time,
-				Type:          tx.Type,
-				ChainID:       tx.ChainID,
+				Hash:    tx.Hash,
+				Height:  tx.Height,
+				Time:    tx.Time,
+				Type:    tx.Type,
+				ChainID: tx.ChainID,
+				Chain: chainResponse{
+					Name: chain.Name,
+					ID:   chain.ID,
+				},
 				SessionHeight: tx.SessionHeight,
 				ExpireHeight:  tx.ExpireHeight,
 				AppPubkey:     tx.AppPubkey,
 				NumRelays:     tx.NumRelays,
-				PoktPerRelay:  tx.PoktPerRelay,
+				IsConfirmed:   tx.ResultCode == 0,
+				Reward: rewardResponse{
+					Amount:       tx.Reward.PoktAmount,
+					NetAmount:    tx.Reward.NetPoktAmount,
+					StakeWeight:  tx.Reward.StakeWeight,
+					PoktPerRelay: tx.Reward.PoktPerRelay,
+				},
 			}
 		}
 
@@ -373,6 +404,8 @@ type nodeResponse struct {
 	IsSynced          bool            `json:"is_synced"`
 	LatestBlockHeight uint            `json:"latest_block_height"`
 	LatestBlockTime   time.Time       `json:"latest_block_time"`
+	CustodialNode     bool            `json:"custodial_node"`
+	OutputAddress     string          `json:"output_address"`
 }
 
 type chainResponse struct {
@@ -416,6 +449,8 @@ func NodeEndpoint(svc Service) endpoint.Endpoint {
 			IsSynced:          node.IsSynced,
 			LatestBlockHeight: node.LatestBlockHeight,
 			LatestBlockTime:   node.LatestBlockTime,
+			CustodialNode:     node.CustodialNode,
+			OutputAddress:     node.OutputAddress,
 		}, nil
 	}
 }

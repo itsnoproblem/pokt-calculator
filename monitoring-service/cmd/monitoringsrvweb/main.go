@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	defaultPort      = "7878"
-	defaultHost      = "localhost"
-	defaultPocketURL = "https://mainnet.gateway.pokt.network/v1/lb/61d4a60d431851003b628aa8/v1"
+	defaultPort = "7878"
+	defaultHost = "localhost"
+	pocketURL   = "https://mainnet.gateway.pokt.network/v1/lb/61d4a60d431851003b628aa8/v1"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 
 	httpAddr := flag.String("listen", defaultHost+":"+defaultPort, "HTTP listen address")
 	dbPath := flag.String("dbPath", defaultDBPath+"/.pokt-calculator-db", "Path to DB data")
-	pocketRpcURL := flag.String("pocketURL", defaultPocketURL, "Pocket network RPC URL")
+	pocketRpcURL := flag.String("pocketURL", pocketURL, "Pocket network RPC URL")
 	flag.Parse()
 
 	router := api.NewRouter(logger)
@@ -63,11 +63,12 @@ func main() {
 			_ = logger.Log("ERROR closing database")
 		}
 	}(bitcaskDB)
+	nodesRepo := db.NewNodesRepo(bitcaskDB)
 	blockTimesRepo := db.NewBlockTimesRepo(bitcaskDB)
 	paramsRepo := db.NewParamsRepo(bitcaskDB)
 
 	// provider
-	prv := pocket.NewPocketProvider(httpClient, *pocketRpcURL, blockTimesRepo, paramsRepo)
+	prv := pocket.NewPocketProvider(httpClient, *pocketRpcURL, blockTimesRepo, paramsRepo, nodesRepo)
 	pocketProvider := prv.WithLogger(logger)
 	nodeSvc := monitoring.NewService(pocketProvider)
 	//accountsSvc = accounts.NewLoggingService(logger, accountsSvc)

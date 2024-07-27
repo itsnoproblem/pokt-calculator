@@ -29,8 +29,8 @@ const (
 )
 
 type blockTimesRepo interface {
-	Get(height uint) (t time.Time, exists bool, err error)
-	Set(height uint, t time.Time) error
+	Get(height int64) (t time.Time, exists bool, err error)
+	Set(height int64, t time.Time) error
 }
 
 type paramsRepo interface {
@@ -41,14 +41,20 @@ type paramsRepo interface {
 	DelAll(height int64) error
 }
 
+type nodesRepo interface {
+	Get(addr string, height int64) (n pocket.Node, exists bool, err error)
+	Set(addr string, height int64, node pocket.Node) error
+}
+
 type Provider interface {
 	NodeProvider(address string) (Provider, error)
 	Height() (uint, error)
 	Param(name string, height int64) (string, error)
 	AllParams(height int64, forceRefresh bool) (pocket.AllParams, error)
 	Node(address string) (pocket.Node, error)
+	NodeAtHeight(address string, height int64) (pocket.Node, error)
 	Balance(address string) (uint, error)
-	BlockTime(height uint) (time.Time, error)
+	BlockTime(height int64) (time.Time, error)
 	Transaction(hash string) (pocket.Transaction, error)
 	AccountTransactions(address string, page uint, perPage uint, sort string) ([]pocket.Transaction, error)
 	SimulateRelay(servicerUrl, chainID string, payload json.RawMessage) (json.RawMessage, error)
@@ -59,15 +65,17 @@ type pocketProvider struct {
 	client         pchttp.Client
 	blockTimesRepo blockTimesRepo
 	paramsRepo     paramsRepo
+	nodesRepo      nodesRepo
 	pocketRpcURL   string
 }
 
-func NewPocketProvider(c pchttp.Client, pocketRpcURL string, blockTimesRepo blockTimesRepo, paramsRepo paramsRepo) Provider {
+func NewPocketProvider(c pchttp.Client, pocketRpcURL string, blockTimesRepo blockTimesRepo, paramsRepo paramsRepo, nodesRepo nodesRepo) Provider {
 
 	return pocketProvider{
 		client:         c,
 		blockTimesRepo: blockTimesRepo,
 		paramsRepo:     paramsRepo,
+		nodesRepo:      nodesRepo,
 		pocketRpcURL:   pocketRpcURL,
 	}
 }
@@ -85,7 +93,7 @@ func (p pocketProvider) NodeProvider(addr string) (Provider, error) {
 		return pocketProvider{}, err
 	}
 
-	return NewPocketProvider(p.client, fmt.Sprintf("%s/v1", node.ServiceURL), p.blockTimesRepo, p.paramsRepo), nil
+	return NewPocketProvider(p.client, fmt.Sprintf("%s/v1", node.ServiceURL), p.blockTimesRepo, p.paramsRepo, p.nodesRepo), nil
 }
 
 func (p pocketProvider) Height() (uint, error) {
@@ -172,6 +180,64 @@ func (p pocketProvider) AllParams(height int64, forceRefresh bool) (pocket.AllPa
 	return pRes, nil
 }
 
+func (p pocketProvider) NodeAtHeight(address string, height int64) (pocket.Node, error) {
+	var fail = func(err error) (pocket.Node, error) {
+		return pocket.Node{}, fmt.Errorf("pocketProvider.Node: %s", err)
+	}
+
+	node, exists, err := p.nodesRepo.Get(address, height)
+	if exists && err == nil {
+		return node, nil
+	}
+
+	url := fmt.Sprintf("%s/%s", p.pocketRpcURL, urlPathGetNode)
+	nodeRequest := queryNodeRequest{
+		Address: address,
+		Height:  height,
+	}
+	var nodeResponse queryNodeResponse
+
+	body, err := p.doRequest(url, nodeRequest)
+	if err != nil {
+		return fail(err)
+	}
+
+	if err = json.Unmarshal(body, &nodeResponse); err != nil {
+		return fail(err)
+	}
+
+	chains := make([]pocket.Chain, len(nodeResponse.Chains))
+	for i, chainID := range nodeResponse.Chains {
+		ch, err := pocket.ChainFromID(chainID)
+		if err != nil {
+			fail(err)
+		}
+
+		chains[i] = ch
+	}
+
+	stakedBal, err := strconv.ParseUint(nodeResponse.StakedBalance, 10, 64)
+	if err != nil {
+		return pocket.Node{}, fmt.Errorf("pocketProvider.Node: %s", err)
+	}
+
+	n := pocket.Node{
+		Address:       nodeResponse.Address,
+		Pubkey:        nodeResponse.Pubkey,
+		ServiceURL:    nodeResponse.ServiceURL,
+		StakedBalance: uint(stakedBal),
+		IsJailed:      nodeResponse.IsJailed,
+		Chains:        chains,
+		IsSynced:      false,
+	}
+
+	err = p.nodesRepo.Set(address, height, n)
+	if err != nil {
+		return pocket.Node{}, err
+	}
+	return n, nil
+}
+
 func (p pocketProvider) Node(address string) (pocket.Node, error) {
 	var fail = func(err error) (pocket.Node, error) {
 		return pocket.Node{}, fmt.Errorf("pocketProvider.Node: %s", err)
@@ -213,6 +279,8 @@ func (p pocketProvider) Node(address string) (pocket.Node, error) {
 		IsJailed:      nodeResponse.IsJailed,
 		Chains:        chains,
 		IsSynced:      false,
+		CustodialNode: nodeResponse.OutputAddress == address || nodeResponse.OutputAddress == "",
+		OutputAddress: nodeResponse.OutputAddress,
 	}, nil
 }
 
@@ -238,7 +306,7 @@ func (p pocketProvider) Balance(address string) (uint, error) {
 	return balResponse.Balance, nil
 }
 
-func (p pocketProvider) BlockTime(height uint) (time.Time, error) {
+func (p pocketProvider) BlockTime(height int64) (time.Time, error) {
 	var fail = func(err error) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("pocketProvider.BlockTime: %s", err)
 	}
@@ -324,6 +392,7 @@ func (p pocketProvider) AccountTransactions(address string, page uint, perPage u
 	var transactions []pocket.Transaction
 	for _, t := range txsResponse.Transactions {
 		txn, err := t.Transaction()
+		txn.Address = address
 		if err != nil {
 			return fail(err)
 		}
@@ -364,35 +433,39 @@ func (p pocketProvider) SimulateRelay(servicerUrl, chainID string, payload json.
 }
 
 func (p pocketProvider) doRequest(url string, reqObj interface{}) ([]byte, error) {
-	var reqBody []byte
 	var err error
+	var reqBody = make([]byte, 0)
+
 	if reqObj != nil {
 		reqBody, err = json.Marshal(reqObj)
 		if err != nil {
 			return nil, fmt.Errorf("doRequest: %s", err)
 		}
 	}
-	req := bytes.NewBuffer(reqBody)
 
+	req := bytes.NewBuffer(reqBody)
 	clientReq, err := http.NewRequest(http.MethodPost, url, req)
 	if err != nil {
 		return nil, fmt.Errorf("doRequest: %s", err)
 	}
+
 	clientReq.Header.Set("Content-Type", contentTypeJSON)
 
 	resp, err := p.client.Do(clientReq)
 	if err != nil {
 		return nil, fmt.Errorf("doRequest: %s", err)
 	}
+
+	if resp == nil {
+		return nil, errors.New("pocketProvider.doRequest: got empty response for " + url)
+	}
+
 	defer func() {
 		if resp.Body != nil {
 			resp.Body.Close()
 		}
 	}()
 
-	if resp == nil {
-		return nil, errors.New("pocketProvider.doRequest: got empty response for " + url)
-	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("pocketProvider.doRequest: got unexpected response status %s - %s", resp.Status, string(reqBody)))
 	}

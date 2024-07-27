@@ -83,6 +83,18 @@ func (p loggingProvider) Node(address string) (pocket.Node, error) {
 	return n, nil
 }
 
+func (p loggingProvider) NodeAtHeight(address string, height int64) (pocket.Node, error) {
+	t := timer.Start()
+	n, err := p.provider.NodeAtHeight(address, height)
+	if err != nil {
+		p.error(err.Error())
+		return pocket.Node{}, err
+	}
+
+	p.info("NodeAtHeight for address %s (took %s)", address, t.Elapsed().String())
+	return n, nil
+}
+
 func (p loggingProvider) Balance(address string) (uint, error) {
 	t := timer.Start()
 	b, err := p.provider.Balance(address)
@@ -95,7 +107,7 @@ func (p loggingProvider) Balance(address string) (uint, error) {
 	return b, nil
 }
 
-func (p loggingProvider) BlockTime(height uint) (time.Time, error) {
+func (p loggingProvider) BlockTime(height int64) (time.Time, error) {
 	//t := timer.Start()
 	bt, err := p.provider.BlockTime(height)
 	if err != nil {

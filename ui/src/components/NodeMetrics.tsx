@@ -75,7 +75,7 @@ export const NodeMetrics = (props: AppStatusProps) => {
             r.transactions.map((t) => {
                 const txDate = new Date(t.time);
                 if((txDate.getTime() >= pastDate.getTime()) && t.is_confirmed) {
-                    totalPOKT += t.num_relays * t.pokt_per_relay;
+                    totalPOKT += t.reward.amount;
                 }
 
                 return this;
@@ -152,7 +152,7 @@ export const NodeMetrics = (props: AppStatusProps) => {
         let lifetimePOKT = 0;
         props.rewards.map((r) => {
             r.transactions.map((t) => {
-                lifetimePOKT += t.num_relays * t.pokt_per_relay;
+                lifetimePOKT += t.reward.amount;
                 lifetimeNumSessions++;
                 return this;
             });

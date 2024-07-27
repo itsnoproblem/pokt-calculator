@@ -30,6 +30,10 @@ do
   # Append configuration property to JS file
   echo "export const $varname = \"$value\";
 " | tee -a $OUTFILE
+
+
+
+
 done < $ENVFILE
 
 

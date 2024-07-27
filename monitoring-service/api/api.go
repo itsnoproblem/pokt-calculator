@@ -91,8 +91,9 @@ func EncodeError(_ context.Context, err error, w http.ResponseWriter) {
 		},
 	}
 
-	w.WriteHeader(httpCode)
-	json.NewEncoder(w).Encode(resp)
+	if err = json.NewEncoder(w).Encode(resp); err != nil {
+		panic(err)
+	}
 }
 
 func EncodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {

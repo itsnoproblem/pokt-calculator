@@ -16,7 +16,7 @@ func NewBlockTimesRepo(db *bitcask.Bitcask) BlockTimesRepo {
 	return BlockTimesRepo{db: db}
 }
 
-func (r BlockTimesRepo) Get(height uint) (t time.Time, exists bool, err error) {
+func (r BlockTimesRepo) Get(height int64) (t time.Time, exists bool, err error) {
 	heightB, _ := json.Marshal(height)
 	blkTimeB, err := r.db.Get(heightB)
 	if err != nil {
@@ -31,7 +31,7 @@ func (r BlockTimesRepo) Get(height uint) (t time.Time, exists bool, err error) {
 	return blockTime, true, nil
 }
 
-func (r BlockTimesRepo) Set(height uint, t time.Time) error {
+func (r BlockTimesRepo) Set(height int64, t time.Time) error {
 	heightB, _ := json.Marshal(height)
 	timeB, _ := json.Marshal(t)
 	err := r.db.Put(heightB, timeB)

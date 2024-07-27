@@ -1,5 +1,11 @@
 import {Chain} from './chain'
 
+export type Reward = {
+    amount: number,
+    stake_weight: number,
+    pokt_per_relay: number,
+}
+
 export type Transaction = {
     hash: string,
     height: number,
@@ -8,8 +14,7 @@ export type Transaction = {
     chain_id: string,
     chain: Chain,
     num_relays: number,
-    pokt_per_relay: number,
-    pokt_amount: number,
+    reward: Reward,
     session_height: number,
     expire_height: number,
     app_pubkey: string,

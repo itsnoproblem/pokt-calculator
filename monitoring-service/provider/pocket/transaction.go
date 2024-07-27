@@ -2,6 +2,7 @@ package pocket
 
 import (
 	"fmt"
+	sdk "monitoring-service/types"
 	"strconv"
 
 	"monitoring-service/pocket"
@@ -29,30 +30,29 @@ type txResult struct {
 
 type transactionResponse struct {
 	Hash   string        `json:"hash"`
-	Height float64       `json:"height"`
+	Height int64         `json:"height"`
 	StdTx  stdTxResponse `json:"stdTx"`
 	Result txResult      `json:"tx_result"`
 }
 
 func (t *transactionResponse) Transaction() (pocket.Transaction, error) {
-	var numProofs uint64
+	numProofs := sdk.NewInt(0)
 	var err error
 
-	if t.StdTx.Message.Value.TotalProofs == "" {
-		numProofs = 0
-	} else {
-		numProofs, err = strconv.ParseUint(t.StdTx.Message.Value.TotalProofs, 10, 32)
-		if err != nil {
+	if t.StdTx.Message.Value.TotalProofs != "" {
+		parsedNum, ok := sdk.NewIntFromString(t.StdTx.Message.Value.TotalProofs)
+		if !ok {
 			return pocket.Transaction{}, fmt.Errorf("transactionResponse.Transaction: %s", err)
 		}
+		numProofs = parsedNum
 	}
 
 	tx := pocket.Transaction{
 		Hash:       t.Hash,
-		Height:     uint(t.Height),
+		Height:     t.Height,
 		Type:       t.StdTx.Message.Type,
 		ChainID:    t.StdTx.Message.Value.Header.Chain,
-		NumRelays:  uint(numProofs),
+		NumRelays:  numProofs,
 		ResultCode: t.Result.Code,
 	}
 

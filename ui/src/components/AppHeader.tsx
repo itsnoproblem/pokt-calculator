@@ -118,7 +118,7 @@ export const AppHeader = (props: AppHeaderProps) => {
             props.rewards[0].transactions.map((t) => {
                 if(!t.is_confirmed && t.expire_height > currentHeight) {
                     pending += t.num_relays;
-                    poktAmount += t.num_relays * t.pokt_per_relay;
+                    poktAmount += t.reward.amount;
                 }
                 return t;
             })

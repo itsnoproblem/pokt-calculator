@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"monitoring-service/pocket"
 	"net/http"
 	"strconv"
 
@@ -158,11 +159,22 @@ func decodeAccountTransactionsRequest(ctx context.Context, req *http.Request) (r
 		sort = "asc"
 	}
 
+	transactionType := req.URL.Query().Get("type")
+
+	if transactionType == "claim" {
+		transactionType = pocket.TypeClaim
+	}
+
+	if transactionType == "proof" {
+		transactionType = pocket.TypeProof
+	}
+
 	return accountTransactionsRequest{
-		Address: address,
-		Page:    uint(page),
-		PerPage: uint(perPage),
-		Sort:    sort,
+		Address:         address,
+		Page:            uint(page),
+		PerPage:         uint(perPage),
+		Sort:            sort,
+		TransactionType: transactionType,
 	}, nil
 }
 

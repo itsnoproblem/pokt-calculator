@@ -12,7 +12,7 @@ interface RewardTransactionProps {
 
 export const RewardTransaction = (props: RewardTransactionProps) => {
     const tx = props.tx;
-    const amount = (tx.type === 'pocketcore/proof') ? '-' : Number(tx.num_relays * tx.pokt_per_relay).toFixed(4) + " POKT";
+    const amount = (tx.type === 'pocketcore/proof') ? '-' : tx.reward.amount.toFixed(4) + " POKT";
     const {hasCopied, onCopy} = useClipboard(tx.hash);
     const {hasCopied: pubkeyHasCopied, onCopy: pubkeyCopy} = useClipboard(tx.app_pubkey);
     const time = new Date(tx.time);
@@ -28,8 +28,9 @@ export const RewardTransaction = (props: RewardTransactionProps) => {
             </GridItem>
             {!isMobile && (<GridItem padding={2} backgroundColor={props.color} pr={4} align={"right"}>{tx.num_relays.toLocaleString()} relays</GridItem>)}
             <GridItem padding={2} backgroundColor={props.color} pr={2} pl={2} align={"left"}>({tx.chain.id}) {tx.chain.name}</GridItem>
-            {!isMobile && (<GridItem padding={2} backgroundColor={props.color} pr={4} align={"right"}>{tx.pokt_per_relay.toFixed(8)}</GridItem>)}
-            <GridItem padding={2} backgroundColor={props.color} align={"right"}>{amount}</GridItem>
+            {!isMobile && (<GridItem padding={2} backgroundColor={props.color} pr={4} align={"right"}>{tx.reward.stake_weight.toFixed(4)}</GridItem>)}
+            {!isMobile && (<GridItem padding={2} backgroundColor={props.color} pr={4} align={"right"}>{tx.reward.pokt_per_relay.toFixed(8)}</GridItem>)}
+            <GridItem padding={2} backgroundColor={props.color} align={"right"}>{tx.reward.amount.toFixed(4)}</GridItem>
             {!isMobile && (
                 <GridItem padding={2} backgroundColor={props.color}>
                     <Text title={tx.app_pubkey}>

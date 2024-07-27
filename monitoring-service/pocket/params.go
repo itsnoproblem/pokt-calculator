@@ -1,12 +1,19 @@
 package pocket
 
-import "fmt"
+import (
+	"fmt"
+	sdk "monitoring-service/types"
+)
 
 type Params struct {
-	RelaysToTokensMultiplier float64
-	DaoAllocation            uint8
-	ProposerPercentage       uint8
-	ClaimExpirationBlocks    uint
+	RelaysToTokensMultiplier             sdk.BigInt
+	ServicerStakeWeightMultiplier        sdk.BigDec
+	ServicerStakeFloorMultiplier         sdk.BigInt
+	ServicerStakeFloorMultiplierExponent sdk.BigDec
+	ServicerStakeWeightCeiling           int64
+	DaoAllocation                        sdk.BigInt
+	ProposerPercentage                   sdk.BigInt
+	ClaimExpirationBlocks                sdk.BigInt
 }
 
 type AllParams struct {
@@ -57,6 +64,12 @@ type Param struct {
 	Value string `json:"param_value"`
 }
 
-func (p Params) PoktPerRelay() float64 {
-	return (p.RelaysToTokensMultiplier / 1000000) * (float64(100-p.DaoAllocation-p.ProposerPercentage) / 100)
+const Pip22ExponentDenominator = 100
+
+func (p Params) LegacyPoktPerRelay() sdk.BigDec {
+	return (p.RelaysToTokensMultiplier.
+		Quo(sdk.NewInt(1000000))).
+		Mul(sdk.NewInt(100).Sub(p.DaoAllocation).Sub(p.ProposerPercentage).
+			Quo(sdk.NewInt(Pip22ExponentDenominator))).
+		ToDec()
 }

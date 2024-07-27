@@ -236,11 +236,12 @@ export const MonthlyRewards = (props: MonthlyRewardsProps) => {
                                 </TabList>
                                 <TabPanels>
                                     <TabPanel p={0}>
-                                        <Grid templateColumns={['repeat(5, auto)', 'repeat(9, auto)']} fontFamily={"monospace"} fontSize={"xs"} p={[1, 5]}>
+                                        <Grid templateColumns={['repeat(5, auto)', 'repeat(10, auto)']} fontFamily={"monospace"} fontSize={"xs"} p={[1, 5]}>
                                             <GridItem padding={2} fontWeight={900} align="left" pl={4}>Height</GridItem>
                                             <GridItem padding={2} fontWeight={900}>Time</GridItem>
                                             {!isMobile && (<GridItem padding={2} fontWeight={900} pr={4} align={"right"}>Relays</GridItem>)}
                                             <GridItem padding={2} fontWeight={900} pr={4} pl={4} align={"left"}>Chain</GridItem>
+                                            {!isMobile && (<GridItem padding={2} fontWeight={900} pr={4} align={"right"}>Stake Weight</GridItem>)}
                                             {!isMobile && (<GridItem padding={2} fontWeight={900} pr={4} align={"right"}>Rate / relay</GridItem>)}
                                             <GridItem padding={2} fontWeight={900} pr={4} align={"right"} >Amount</GridItem>
                                             {!isMobile && (<GridItem padding={2} fontWeight={900}>App Pubkey</GridItem>)}
